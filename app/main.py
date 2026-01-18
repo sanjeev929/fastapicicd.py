@@ -11,3 +11,7 @@ def read_root():
 def health():
     return {"status": "ok"}
 
+@app.get("/health_record")
+def healthrecord():
+    return {"status": "ok"}
+
