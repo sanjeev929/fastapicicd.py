@@ -31,7 +31,7 @@ jobs:
 
           # Pull latest code
           if [ ! -d ".git" ]; then
-            git clone https://github.com/sanjeev929/YOUR_REPO.git .
+            git clone https://github.com/sanjeev929/fastapicicd.py.git .
           else
             git pull origin main
           fi
