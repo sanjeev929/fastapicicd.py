@@ -10,40 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Deploy to Lightsail
-      run: |
-        ssh ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} << 'EOF'
-          set -e
+      - name: Deploy
+        run: |
+          ssh ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} << 'EOF'
+            set -e
 
-          # Go to app directory (change if needed)
-          mkdir -p fastapi-app
-          cd fastapi-app
-
-          # Pull latest code
-          if [ ! -d ".git" ]; then
-            git clone https://github.com/sanjeev929/fastapicicd.py.git .
-          else
+            cd ~/fastapi-app || exit 1
             git pull origin main
-          fi
 
-          # Stop old container
-          docker stop fastapi || true
-          docker rm fastapi || true
+            docker stop fastapi || true
+            docker rm fastapi || true
 
-          # Build & run new container
-          docker build -t fastapi-app .
-          docker run -d \
-            --name fastapi \
-            -p 80:80 \
-            fastapi-app
-        EOF
+            docker build -t fastapi-app .
+            docker run -d --name fastapi -p 80:80 fastapi-app
+          EOF
